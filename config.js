@@ -23,22 +23,6 @@ module.exports = {
       },
       {
         filePattern: [
-          'src/app/engine/webhook/*',
-          '!src/app/engine/**/*.example.*',
-        ],
-        srcDir: 'src/app/engine/webhook',
-        dstDir: 'webhook',
-        resourceType: 'service',
-        meta: {
-          language: 'JavaScript',
-          subject: 'tokenAcc',
-          endPoints: {
-            slack: 'slack.js',
-          },
-        },
-      },
-      {
-        filePattern: [
           'src/app/engine/slack/*',
           '!src/app/engine/slack/*.example.*',
         ],
