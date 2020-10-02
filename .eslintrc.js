@@ -7,20 +7,26 @@ module.exports = {
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
+    "prettier/@typescript-eslint",
   ],
-  "parser": "babel-eslint",
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true,
-    },
-    "ecmaVersion": 7,
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
   "plugins": [
     "react",
     "react-hooks",
   ], 
+  "settings": {
+    "react": {
+      "version": "16.13"
+    }
+  },
   "rules": {
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
