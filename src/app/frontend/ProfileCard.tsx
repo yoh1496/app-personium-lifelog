@@ -4,18 +4,22 @@ import {
   usePersoniumAuthentication,
   usePersoniumProfile,
 } from './lib/Personium';
+import { PersoniumCellUrl } from 'personium-sdk-ts';
 
-function ProfileImg({ src }) {
+const ProfileImg: React.FC<{ src: string }> = ({ src }) => {
   return <img src={src} />;
-}
+};
 
 ProfileImg.propTypes = {
   src: PropTypes.string.isRequired,
 };
 
-export function ProfileCard() {
+type ProfileCardProps = {
+  cellUrl: PersoniumCellUrl;
+};
+export const ProfileCard: React.FC<ProfileCardProps> = ({ cellUrl }) => {
   const { auth } = usePersoniumAuthentication();
-  const { profile, loading, error } = usePersoniumProfile(auth.p_target);
+  const { profile, loading, error } = usePersoniumProfile(cellUrl);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -30,6 +34,15 @@ export function ProfileCard() {
     );
   }
 
+  if (profile === null) {
+    return (
+      <div>
+        <h3>Profile not found</h3>
+        <div></div>
+      </div>
+    );
+  }
+
   console.log(profile);
 
   return (
@@ -39,4 +52,8 @@ export function ProfileCard() {
       <ProfileImg src={profile.Image} />
     </div>
   );
-}
+};
+
+ProfileCard.propTypes = {
+  cellUrl: PropTypes.instanceOf(PersoniumCellUrl).isRequired,
+};

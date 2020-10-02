@@ -14,12 +14,23 @@ const defaultBoxContext = {
   loading: true,
   error: null,
   boxUrl: null,
-  refetchBoxUrl: null,
 };
 
-const PersoniumBoxContext = createContext(defaultBoxContext);
+type BoxContextType = {
+  loading: boolean;
+  error: null | string;
+  boxUrl: null | string;
+  refetchBoxUrl?: () => void;
+};
 
-export function useBoxUrl() {
+const PersoniumBoxContext = createContext<BoxContextType>(defaultBoxContext);
+
+export function useBoxUrl(): {
+  loading: boolean;
+  error: null | string;
+  boxUrl: null | string;
+  refetchBoxUrl?: () => void;
+} {
   const { loading, error, boxUrl, refetchBoxUrl } = useContext(
     PersoniumBoxContext
   );
@@ -27,12 +38,12 @@ export function useBoxUrl() {
   return { loading, error, boxUrl, refetchBoxUrl };
 }
 
-export function PersoniumBoxProvider(props) {
+export const PersoniumBoxProvider: React.FC = ({ children }) => {
   const { config } = usePersoniumConfig();
   const { auth } = usePersoniumAuthentication();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [boxUrl, setBoxUrl] = useState(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<null | string>(null);
+  const [boxUrl, setBoxUrl] = useState<null | string>(null);
 
   const unmounted = useRef(false);
   const prevSchemaUrl = useRef('');
@@ -49,7 +60,7 @@ export function PersoniumBoxProvider(props) {
       if (schemaUrl !== null) {
         requestUrl.searchParams.set('schema', schemaUrl);
       }
-      const res = await fetch(requestUrl, {
+      const res = await fetch(requestUrl.toString(), {
         headers: { Authorization: `Bearer ${access_token}` },
         redirect: 'manual',
       });
@@ -69,6 +80,12 @@ export function PersoniumBoxProvider(props) {
   );
 
   const refetchBoxUrl = useCallback(() => {
+    if (!config.appCellUrl || !config.targetCellUrl) {
+      setError('appCellUrl or targetCellUrl is not set');
+      setBoxUrl(null);
+      return;
+    }
+
     const schemaUrl = config.appCellUrl;
     const cellUrl = config.targetCellUrl;
     setLoading(true);
@@ -102,7 +119,7 @@ export function PersoniumBoxProvider(props) {
         config.targetCellUrl === prevCellUrl.current
       ) {
         // do nothing
-        return () => {};
+        return;
       }
 
       refetchBoxUrl();
@@ -119,10 +136,10 @@ export function PersoniumBoxProvider(props) {
     <PersoniumBoxContext.Provider
       value={{ loading, error, boxUrl, refetchBoxUrl }}
     >
-      {props.children}
+      {children}
     </PersoniumBoxContext.Provider>
   );
-}
+};
 
 PersoniumBoxProvider.propTypes = {
   children: PropTypes.node.isRequired,

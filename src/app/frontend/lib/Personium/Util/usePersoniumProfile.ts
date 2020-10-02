@@ -1,7 +1,22 @@
 import { useState, useEffect } from 'react';
+import { PersoniumCellUrl } from 'personium-sdk-ts';
 
-export function usePersoniumProfile(cellUrl, lang = 'ja', fallback = true) {
-  const [profile, setProfile] = useState({});
+type PersoniumProfile = {
+  DisplayName: string;
+  Description: string;
+  Image: string;
+};
+
+export function usePersoniumProfile(
+  cellUrl: PersoniumCellUrl,
+  lang = 'ja',
+  fallback = true
+): {
+  loading: boolean;
+  error: null | string;
+  profile: null | PersoniumProfile;
+} {
+  const [profile, setProfile] = useState<null | PersoniumProfile>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,14 +35,15 @@ export function usePersoniumProfile(cellUrl, lang = 'ja', fallback = true) {
           break;
         }
       }
-
-      if (!lastResponse.ok) {
-        throw {
-          status: lastResponse.status,
-          statusText: lastResponse.statusText,
-        };
-      } else {
-        return lastResponse.json();
+      if (lastResponse) {
+        if (!lastResponse.ok) {
+          throw {
+            status: lastResponse.status,
+            statusText: lastResponse.statusText,
+          };
+        } else {
+          return lastResponse.json();
+        }
       }
     })()
       .then(jsonDat => {

@@ -1,8 +1,5 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { ProfileCard } from './ProfileCard';
-import { usePersoniumAuthentication } from './lib/Personium';
-
 import { useBoxUrl } from './lib/Personium/Context/PersoniumBox';
 import { usePersoniumBoxInstall } from './lib/Personium/Util/usePersoniumBoxInstall';
 
@@ -75,29 +72,4 @@ function BoxView() {
   }
 
   return <p>{boxUrl}</p>;
-}
-
-export function UserPage() {
-  const { logout } = usePersoniumAuthentication();
-
-  const handleClick = useCallback(
-    e => {
-      e.preventDefault();
-      logout();
-    },
-    [logout]
-  );
-
-  return (
-    <>
-      <h2>User Page</h2>
-      <ProfileCard />
-      <BoxView />
-      <div style={{ padding: 8 }}>
-        <a href="#" onClick={handleClick}>
-          Logout
-        </a>
-      </div>
-    </>
-  );
 }

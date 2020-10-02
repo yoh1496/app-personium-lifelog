@@ -1,15 +1,33 @@
 import { useState, useCallback } from 'react';
 import { usePersoniumAuthentication, usePersoniumConfig } from '../Context';
+import { string } from 'prop-types';
 
-export function usePersoniumBoxInstall(barPath = '__/app.bar', boxName) {
+type StatusBody = {
+  time: number;
+  text: string;
+};
+
+type ErrorBody = {
+  text: string;
+};
+
+export function usePersoniumBoxInstall(
+  barPath = '__/app.bar',
+  boxName: string
+): {
+  loading: boolean;
+  error: null | ErrorBody;
+  status: Array<StatusBody>;
+  installBar: () => void;
+} {
   const { auth } = usePersoniumAuthentication();
   const { config } = usePersoniumConfig();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [status, setStatus] = useState([]);
+  const [error, setError] = useState<null | ErrorBody>(null);
+  const [status, setStatus] = useState<Array<StatusBody>>([]);
 
   const updateInstallStatus = useCallback(
-    text => {
+    (text: string) => {
       setStatus(c => [...c, { time: Date.now(), text }]);
     },
     [setStatus]
@@ -18,6 +36,8 @@ export function usePersoniumBoxInstall(barPath = '__/app.bar', boxName) {
   const installBar = useCallback(async () => {
     let pollingStatusID = -1;
     setLoading(true);
+
+    if (!auth) throw 'not authenticated';
 
     const { access_token } = auth;
 
@@ -52,7 +72,7 @@ export function usePersoniumBoxInstall(barPath = '__/app.bar', boxName) {
     if (sendRes.status === 202) {
       // Accepted
       // const boxStatusURL = sendRes.headers.get('location');
-      let timeoutID = setTimeout(() => {
+      let timeoutID = window.setTimeout(() => {
         if (pollingStatusID !== -1) {
           clearInterval(pollingStatusID);
           pollingStatusID = -1;
@@ -62,7 +82,7 @@ export function usePersoniumBoxInstall(barPath = '__/app.bar', boxName) {
           updateInstallStatus('timeout');
         }
       }, 30000);
-      pollingStatusID = setInterval(async () => {
+      pollingStatusID = window.setInterval(async () => {
         const boxStatus = await fetch(boxURL, {
           headers: {
             Authorization: `Bearer ${access_token}`,
